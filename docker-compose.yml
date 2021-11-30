@@ -1,0 +1,42 @@
+version: '3'
+services:
+  diplom_nginx:
+    image: nginx:latest
+    container_name: diplom_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/conf.d/diplom.conf:/etc/nginx/conf.d/diplom.conf
+      - ./diplom:/var/www/diplom.local
+      - ./logs/nginx:/var/log/nginx
+    links:
+      - diplom_php
+    networks:
+      - diplom
+  diplom_php:
+    container_name: diplom_php
+    build: ./config/php
+    user: "${UID}:${GID}"
+    links:
+      - diplom_mysql
+    volumes:
+      - ./diplom:/var/www/diplom.local
+    networks:
+      - diplom
+  diplom_mysql:
+    image: mysql
+    container_name: diplom_mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+#      - ./config/mysql/conf:/etc/mysql
+#      - ./logs/mysql:/var/log/mysql
+#      - ./mysql/mysql-files:/var/lib/mysql-files
+    networks:
+      - diplom
+
+networks:
+  diplom:
+    external: true
